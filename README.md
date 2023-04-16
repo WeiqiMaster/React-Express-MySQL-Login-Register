@@ -4,7 +4,6 @@ docker run -p 3306:3306 --name mysql-server -v $PWD/init_db_scripts:/docker-entr
 ``` -->
 # Use docker-compose to start up nginx reverse proxy, fronend, backend, MySQL, Redis containers all at once
 - docker-compose up --build
-- docker-compose up
 
 #### The webpage will be available at http://localhost
 
@@ -31,7 +30,7 @@ npm run dev
 ``` -->
 
 
-# Testing ethereal email account. Fake verification code will be sent from this email (The recipient will not recieved the email). Check https://ethereal.email
+# Testing ethereal email account (Fake verification code will be sent from this email. The recipient will not receive the email. Check https://ethereal.email)
 - Username: 	brody48@ethereal.email (also works as a real inbound email address)
 - Password: 	1bWqZCcVwKuZTdT7G4
 
