@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  mysql_db:
+    image: mysql
+    restart: always
+    volumes:
+      - "./init_db_scripts:/docker-entrypoint-initdb.d"
+    expose:
+      - 3306
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+    networks:
+      - app-network
+
+  redis:
+    image: redis/redis-stack-server:latest
+    expose:
+      - 6739
+    ports:
+      - 6379:6379
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      dockerfile: Dockerfile
+      context: ./react_frontend
+    volumes:
+      - /app/node_modules
+      - ./react_frontend:/app
+    environment:
+      PORT: "3001"
+    ports:
+      - 3301:3301
+    networks:
+      - app-network
+
+  backend:
+    build:
+      dockerfile: Dockerfile
+      context: "./express_backend"
+    depends_on:
+      - mysql_db
+      - redis
+    ports:
+      - 3002:3002
+    working_dir: /app
+    volumes:
+      - /app/node_modules
+      - ./express_backend:/app
+    environment:
+      REDIS_HOST: "redis"
+      NODE_PORT: "3002"
+      SECRET: "express secret"
+      MYSQL_HOST: "mysql"
+    networks:
+      - app-network
+  
+  nginx:
+    depends_on:
+      - frontend
+      - backend
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ./nginx
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+

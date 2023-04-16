@@ -1,11 +1,9 @@
 const db = require("../models");
-const config = require("../config/auth.config");
 const User = db.user;
 const Role = db.role;
 
 const Op = db.Sequelize.Op;
 
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const nodemailer = require('nodemailer');
 
@@ -99,7 +97,8 @@ exports.signin = async (req, res) => {
     });
 
     req.session.verificationCode = verificationCode;
-    console.log("tokenset", req.session.verificationCode)
+    req.session.userid = user.id;
+    //console.log("tokenset", req.session.verificationCode)
 
     
     return res.status(200).send({
@@ -113,21 +112,35 @@ exports.signin = async (req, res) => {
   }
 };
 
-exports.verify = (req, res) => {
+exports.authenticate = (req, res) => {
   if (req.session.verificationCode == req.body.verificationCode) {
+    req.session.loggedin = true;
     return res.status(200).send({
       message: "Successfully logged in!",
     });
   } else {
     return res.status(401).send({
       message: "Invalid Verification Code!",
+      codeInvalid: true
+    });
+  }
+};
+
+exports.verify = (req, res) => {
+  if (req.session.loggedin) {
+    return res.status(200).send({
+      message: "User already logged in!",
+    });
+  } else {
+    return res.status(401).send({
+      message: "No valid session!",
     });
   }
 };
 
 exports.signout = async (req, res) => {
   try {
-    req.session = null;
+    req.session.destroy();
     return res.status(200).send({
       message: "You've been signed out!"
     });

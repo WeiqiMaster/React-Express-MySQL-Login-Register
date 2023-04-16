@@ -1,7 +1,7 @@
-const authJwt = require("./authJwt");
+const verifyValidSession = require("./verifyValidSession");
 const verifySignUp = require("./verifySignUp");
 
 module.exports = {
-  authJwt,
+  verifyValidSession,
   verifySignUp
 };

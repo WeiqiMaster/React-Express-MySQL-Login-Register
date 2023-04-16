@@ -1,12 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../api'
+import { login, checkIfAlreadyLoggedin } from '../api'
 import '../../App.css'
 
 export default function SignInPage() {
     const naviagete = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+
+    useEffect(() => {
+        checkIfAlreadyLoggedin()
+            .then((response) => {
+                naviagete("/home");
+            })
+            .catch((error) => {
+                console.error(error.response);
+            });
+    }, []);
 
     const handleUsername = (event) => {
         setUsername(event.target.value);
@@ -17,13 +27,14 @@ export default function SignInPage() {
     }
 
     const handleLogin = () => {
-        login({username: username, password: password}).then((resp) => {
-            if (resp) {
+        login({username: username, password: password})
+            .then((response) => {
                 naviagete("/verify");
-            } else {
-                alert("username and password combination does not exist");
-            }
-        });
+            })
+            .catch((error) => {
+                console.error(error.response);
+                alert(error.response.data.message);
+            });
     }
 
     return (

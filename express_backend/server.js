@@ -1,6 +1,5 @@
 require('dotenv').config()
 const express = require("express");
-const proxy = require('express-http-proxy');
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
@@ -10,7 +9,10 @@ const redis = require('redis')
 var session = require('express-session')
 
 let RedisStore = require('connect-redis')(session)
-let redisClient = redis.createClient()
+let redisClient = redis.createClient({
+    host: process.env.REDIS_HOST || "redis",
+    port: 6379
+})
 
 redisClient.on('error', (err) =>
   console.log(`Fail to connect to redis. ${err}`)
@@ -18,13 +20,12 @@ redisClient.on('error', (err) =>
 redisClient.on('connect', () => console.log('Successfully connect to redis'))
 
 app.use(
-  cors()
+  cors({
+    // origin: "http://172.19.0.2:3001", //"http://localhost:80", //"http://localhost:3001",
+    methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
+    credentials: true,
+  })
 );
-// {
-//   origin: "http://localhost:3001",
-//   methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
-//   credentials: true,
-// }
 
 // parse requests of content-type - application/json
 app.use(express.json());
@@ -33,18 +34,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser())
+
 app.use(
   session({
     store: new RedisStore({ client: redisClient }),
     secret: process.env.SECRET || "default secret",
-    cookie: { domain: 'localhost', secure: false },
+    cookie: {
+      domain: 'localhost',
+      secure: false,
+      maxAge: 60 * 1000 // expire in 1 min for testing purpose
+    },
     resave: true,
     saveUninitialized: true,
   })
 )
 
 // database
-const db = require("./app/models");
+const db = require("./models");
 const Role = db.role;
 
 db.sequelize.sync();
@@ -60,29 +66,11 @@ app.get("/", (req, res) => {
 });
 
 // routes
-require("./app/routes/auth.routes")(app);
+require("./routes/auth.routes")(app);
 
 
-// app.use(proxy('http://127.0.0.1:3001'));
 // set port, listen for requests
 const PORT = process.env.NODE_PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
-
-function initial() {
-  Role.create({
-    id: 1,
-    name: "user",
-  });
-
-  Role.create({
-    id: 2,
-    name: "moderator",
-  });
-
-  Role.create({
-    id: 3,
-    name: "admin",
-  });
-}

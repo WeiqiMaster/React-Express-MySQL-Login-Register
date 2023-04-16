@@ -10,7 +10,7 @@ sudo docker exec -it mysql-server mysql -u root -p
 
 ## Start the redis server to store the sessions:
 ```
-docker exec -it redis-stack-server redis-cli
+docker run -d --name redis-stack-server -p 6379:6379 redis/redis-stack-server:latest
 ```
 
 <!-- ## Use docker to start the server:
@@ -31,5 +31,9 @@ npm install
 npm run dev
 ```
 
+## Testing ethereal email account. Verification codes are sent from this email. See https://ethereal.email
+Name    	Brody Jacobs
+Username 	brody48@ethereal.email (also works as a real inbound email address)
+Password 	1bWqZCcVwKuZTdT7G4
 
 

@@ -1,9 +1,7 @@
-FROM node:14
+FROM node:14-alpine
 
 # Create app directory
 WORKDIR /app
-
-ENV PATH /app/node_modules/.bin:$PATH
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
@@ -15,8 +13,9 @@ RUN npm install
 # RUN npm ci --omit=dev
 
 # Bundle app source
-COPY . ./
+COPY ./ ./
 
-EXPOSE 3001 3002
-CMD [ "npm", "run", "dev" ]
+EXPOSE 3301
+
+CMD [ "npm", "start" ]
 

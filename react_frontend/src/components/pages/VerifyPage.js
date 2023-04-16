@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { verify } from '../api'
+import { authenticate } from '../api'
 import '../../App.css'
 
 export default function VerifyPage() {
@@ -12,20 +12,17 @@ export default function VerifyPage() {
     }
 
     const handleVerify = () => {
-        verify({verificationCode: verificationCode})
+        authenticate({verificationCode: verificationCode})
             .then((response) => {
                 naviagete("/home");
             })
             .catch((error) => {
                 console.error(error.response);
                 alert(error.response.data.message);
+                if (error.response.data.sessionInvalid) {
+                    naviagete("/login");
+                }
             });
-            // if (resp.status)
-            // if (resp.data.message) {
-            //     alert(resp.message);
-            // } else {
-            //     naviagete("/home");
-            // }
     }
 
     return (
